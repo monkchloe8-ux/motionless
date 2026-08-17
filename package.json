@@ -1,0 +1,10 @@
+{
+  "name": "motionless",
+  "private": true,
+  "version": "1.0.0",
+  "description": "MOTION / LESS — an experiment in web motion. SIDN390 capstone.",
+  "scripts": {
+    "start": "npx --yes serve . -l 3000"
+  },
+  "stackblitz": { "startCommand": "npx --yes serve . -l 3000" }
+}

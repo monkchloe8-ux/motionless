@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MOTION / LESS</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- corner meta -->
+<div class="meta tl mono">Motion / Less</div>
+<div class="meta tr mono">an experiment in web motion</div>
+
+<main>
+
+  <!-- ─────────── LANDING ─────────── -->
+  <section class="pane hero" id="landing">
+    <h1>MOTION<span class="slash">/</span>LESS</h1>
+    <p class="lede">Same content, four amounts of motion. You decide how much.
+       We publish what people keep.</p>
+    <p class="cue mono" id="cue">Scroll ↓</p>
+  </section>
+
+  <!-- ─────────── MOVEMENT 01 — THE FALL ─────────── -->
+  <section class="pane movement" data-movement="fall">
+    <div class="stage"><canvas></canvas>
+      <div class="content"><div class="inner">
+        <h3>The same paragraph, four times.</h3>
+        <p>Nothing in this block changes. Not the words, not the size, not the
+           spacing. The only thing the dial changes is how much the page moves
+           around it — and whether you can still read it when it does.</p>
+      </div></div>
+    </div>
+    <div class="panel">
+      <p class="mono tag">Movement 01</p>
+      <h2>The fall</h2>
+      <p class="line">Motion that moves your whole field of view.</p>
+      <div class="dial" data-dial></div>
+    </div>
+  </section>
+
+  <!-- ─────────── MOVEMENT 02 — THE BLOOM ─────────── -->
+  <section class="pane movement" data-movement="bloom">
+    <div class="stage"><canvas></canvas>
+      <div class="content"><div class="inner">
+        <h3>The same paragraph, four times.</h3>
+        <p>Nothing in this block changes. Not the words, not the size, not the
+           spacing. The only thing the dial changes is how much the page moves
+           around it — and whether you can still read it when it does.</p>
+      </div></div>
+    </div>
+    <div class="panel">
+      <p class="mono tag">Movement 02</p>
+      <h2>The bloom</h2>
+      <p class="line">Beautiful motion that does nothing. Worth it?</p>
+      <div class="dial" data-dial></div>
+    </div>
+  </section>
+
+  <!-- ─────────── MOVEMENT 03 — THE PULSE ─────────── -->
+  <section class="pane movement" data-movement="pulse">
+    <div class="stage"><canvas></canvas>
+      <div class="content"><div class="inner">
+        <h3>The same paragraph, four times.</h3>
+        <p>Nothing in this block changes. Not the words, not the size, not the
+           spacing. The only thing the dial changes is how much the page moves
+           around it — and whether you can still read it when it does.</p>
+      </div></div>
+    </div>
+    <div class="panel">
+      <p class="mono tag">Movement 03</p>
+      <h2>The pulse</h2>
+      <p class="line">Motion at the edge of your eye. It never touches the words — try reading anyway.</p>
+      <div class="dial" data-dial></div>
+    </div>
+  </section>
+
+  <!-- ─────────── MOVEMENT 04 — THE FLOW ─────────── -->
+  <section class="pane movement" data-movement="flow">
+    <div class="stage"><canvas></canvas>
+      <div class="content"><div class="inner">
+        <h3>The same paragraph, four times.</h3>
+        <p>Nothing in this block changes. Not the words, not the size, not the
+           spacing. The only thing the dial changes is how much the page moves
+           around it — and whether you can still read it when it does.</p>
+      </div></div>
+    </div>
+    <div class="panel">
+      <p class="mono tag">Movement 04</p>
+      <h2>The flow</h2>
+      <p class="line">Motion that answers you — move your cursor across it.</p>
+      <div class="dial" data-dial></div>
+    </div>
+  </section>
+
+  <!-- ─────────── SUBMIT ─────────── -->
+  <section class="pane submit" id="submit">
+    <h2>How much did you keep?</h2>
+    <p class="line">Two quick questions, then see what everyone else chose.</p>
+
+    <form id="survey">
+      <fieldset>
+        <legend class="mono">Are you a designer or developer?</legend>
+        <label><input type="radio" name="designer" value="yes"> Yes</label>
+        <label><input type="radio" name="designer" value="no"> No</label>
+      </fieldset>
+      <fieldset>
+        <legend class="mono">Do you experience discomfort from web motion?</legend>
+        <label><input type="radio" name="sensitive" value="yes"> Yes</label>
+        <label><input type="radio" name="sensitive" value="sometimes"> Sometimes</label>
+        <label><input type="radio" name="sensitive" value="no"> No</label>
+      </fieldset>
+      <button type="submit" class="btn">Submit</button>
+    </form>
+
+    <!-- reward, revealed after submit -->
+    <div class="reward" id="reward" hidden>
+      <h3 id="rewardHead">Here's what you kept.</h3>
+      <div class="reward-grid" id="rewardGrid"></div>
+      <p class="mono note">This is placeholder data — the live site reads real responses.</p>
+      <p><a class="link" href="findings.html">See the findings →</a>
+         &nbsp;·&nbsp; <a class="link" href="about.html">Why this exists →</a></p>
+    </div>
+  </section>
+
+  <footer class="mono">
+    <span>Motion / Less — SIDN390 capstone</span>
+    <span><a class="link" href="findings.html">Findings</a> · <a class="link" href="about.html">About</a></span>
+  </footer>
+</main>
+
+<script src="movements.js"></script>
+<script src="site.js"></script>
+</body>
+</html>
