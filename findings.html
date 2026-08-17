@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Findings — MOTION / LESS</title>
+<title>Findings · MOTION / LESS</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,39 +14,64 @@
   <a class="link back mono" href="index.html">← back</a>
   <h1>Findings</h1>
   <p>Where visitors set each dial. The content stayed the same; the motion is what they
-     chose to keep or lose. <span class="mono">(placeholder data — the live page reads real responses)</span></p>
+     chose to keep or lose. <span class="mono" id="state">(placeholder data until responses come in)</span></p>
 
-  <div class="chart">
-    <div class="col">
-      <div class="bars"><i style="height:14%"></i><i style="height:24%"></i><i style="height:42%"></i><i style="height:70%"></i><i style="height:96%"></i></div>
+  <div class="chart" id="chart">
+    <div class="col" data-kind="fall">
+      <div class="bars"><i style="height:96%"></i><i style="height:70%"></i><i style="height:42%"></i><i style="height:24%"></i><i style="height:14%"></i></div>
       <div class="cap">The fall</div>
-      <div class="sub">harm · the body → tuned low</div>
+      <div class="sub">harm · the body</div>
     </div>
-    <div class="col">
-      <div class="bars"><i style="height:80%"></i><i style="height:40%"></i><i style="height:28%"></i><i style="height:44%"></i><i style="height:82%"></i></div>
+    <div class="col" data-kind="bloom">
+      <div class="bars"><i style="height:82%"></i><i style="height:44%"></i><i style="height:28%"></i><i style="height:40%"></i><i style="height:80%"></i></div>
       <div class="cap">The bloom</div>
-      <div class="sub">contested → split</div>
+      <div class="sub">contested</div>
     </div>
-    <div class="col">
-      <div class="bars"><i style="height:10%"></i><i style="height:20%"></i><i style="height:38%"></i><i style="height:66%"></i><i style="height:98%"></i></div>
+    <div class="col" data-kind="pulse">
+      <div class="bars"><i style="height:98%"></i><i style="height:66%"></i><i style="height:38%"></i><i style="height:20%"></i><i style="height:10%"></i></div>
       <div class="cap">The pulse</div>
-      <div class="sub">harm · attention → tuned low</div>
+      <div class="sub">harm · attention</div>
     </div>
-    <div class="col">
-      <div class="bars"><i style="height:96%"></i><i style="height:68%"></i><i style="height:42%"></i><i style="height:24%"></i><i style="height:14%"></i></div>
+    <div class="col" data-kind="flow">
+      <div class="bars"><i style="height:14%"></i><i style="height:24%"></i><i style="height:42%"></i><i style="height:68%"></i><i style="height:96%"></i></div>
       <div class="cap">The flow</div>
-      <div class="sub">help · responsive → tuned high</div>
+      <div class="sub">help · responsive</div>
     </div>
   </div>
-  <p class="mono" style="color:var(--dim)">03 maximal &nbsp;———&nbsp; 00 static &nbsp;·&nbsp; n = [live count]</p>
+  <p class="axis mono"><span>00 static</span><span id="count">n = placeholder</span><span>03 maximal</span></p>
 
   <h2>What it looks like so far</h2>
-  <p>People strip the motion that harms them and keep the motion that helps — the fall and the
+  <p>People strip the motion that harms them and keep the motion that helps. The fall and the
      pulse settle low, the flow stays high, and the bloom splits the room. That gap is the finding: given a
      control the web rarely offers, people can tell useful motion from the rest.</p>
 
   <h2>In their words</h2>
   <p>“[survey quotes appear here once the site is live]”</p>
 </div>
+
+<script src="site-config.js"></script>
+<script>
+/* if an endpoint is set, this page stops showing placeholders and starts
+   showing what people actually chose. counts only, never a single response. */
+(function(){
+  const url = window.MOTIONLESS_ENDPOINT;
+  if (!url) return;
+  fetch(url).then(r => r.json()).then(d => {
+    if (!d || !d.n) return;
+    document.querySelectorAll('#chart .col').forEach(col => {
+      const h = d.hist[col.dataset.kind]; if (!h) return;
+      const max = Math.max.apply(null, h) || 1;
+      col.querySelectorAll('.bars i').forEach((bar,i) => {
+        bar.style.height = Math.max(4, Math.round(h[i]/max*100)) + '%';
+      });
+      const avg = d.avg[col.dataset.kind];
+      if (avg !== undefined) col.querySelector('.sub').textContent += ' · avg ' + avg.toFixed(1);
+    });
+    document.getElementById('count').textContent = 'n = ' + d.n;
+    const st = document.getElementById('state');
+    if (st) st.textContent = '(live. ' + d.n + ' responses so far)';
+  }).catch(e => console.warn('[motionless] findings unavailable:', e));
+})();
+</script>
 </body>
 </html>

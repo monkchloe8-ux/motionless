@@ -107,26 +107,59 @@
       reducedMotion: REDUCED,
       ts: new Date().toISOString()
     };
-    console.log('[motionless] submission →', data);   // TODO: POST to backend (Supabase)
+    const endpoint = window.MOTIONLESS_ENDPOINT;
+    if (endpoint){
+      // text/plain keeps the browser from sending a preflight request that
+      // Apps Script will not answer. the script reads the body regardless.
+      fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(data)
+      }).catch(err => console.warn('[motionless] could not save:', err));
+    } else {
+      console.log('[motionless] not saved (no endpoint set) →', data);
+    }
+    // the reward shows either way — a dropped response is our problem, not theirs
     showReward(data);
   });
 
-  function showReward(){
-    const grid = document.getElementById('rewardGrid');
-    const others = { fall: 0.6, bloom: 1.8, pulse: 0.5, flow: 2.5 };   // placeholder averages
-    const names = { fall:'The fall', bloom:'The bloom', pulse:'The pulse', flow:'The flow' };
-    grid.innerHTML = Object.keys(names).map(k => {
-      const you = (+state[k]).toFixed(1), avg = others[k].toFixed(1);
+  const NAMES = { fall:'The fall', bloom:'The bloom', pulse:'The pulse', flow:'The flow' };
+
+  function drawReward(avgs, n){
+    document.getElementById('rewardGrid').innerHTML = Object.keys(NAMES).map(k => {
+      const you = (+state[k]).toFixed(1);
+      // only claim what other people chose if other people have actually chosen.
+      // a made-up average would be a lie told to someone helping with research.
+      const other = (avgs && n >= 5 && avgs[k] !== undefined)
+        ? ' · others avg ' + (+avgs[k]).toFixed(1)
+        : '';
       return `<div class="reward-card">
-        <div class="name">${names[k]}</div>
-        <div class="stat">you ${you} · others avg ${avg}</div>
+        <div class="name">${NAMES[k]}</div>
+        <div class="stat">you ${you}${other}</div>
       </div>`;
     }).join('');
+    const note = document.querySelector('#reward .note');
+    if (note){
+      note.textContent = (n >= 5)
+        ? 'Based on ' + n + ' responses so far.'
+        : 'Yours is one of the first responses. Comparisons appear once a few more come in.';
+    }
+  }
+
+  function showReward(){
+    drawReward(null, 0);                                  // show your own numbers straight away
     const r = document.getElementById('reward');
     r.hidden = false; r.scrollIntoView({behavior: REDUCED?'auto':'smooth', block:'start'});
     document.getElementById('rewardHead').textContent =
       (+state.flow > +state.fall && +state.flow > +state.pulse)
         ? "You kept the motion that answers you and cut the rest." : "Here's what you kept.";
+
+    // then fill in the real comparison if the sheet has enough in it
+    const endpoint = window.MOTIONLESS_ENDPOINT;
+    if (!endpoint) return;
+    fetch(endpoint).then(x => x.json()).then(d => {
+      if (d && d.n) drawReward(d.avg, d.n);
+    }).catch(() => {});                                   // silence: the visitor still has their result
   }
 
   /* hide the scroll cue once you move */

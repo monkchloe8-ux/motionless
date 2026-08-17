@@ -36,6 +36,15 @@
       } else {
         addEventListener('resize', () => this.size());
       }
+      this.prepareWords();
+      addEventListener('load', () => this.measureText());
+      setTimeout(() => this.measureText(), 60);
+      // only drive the stages you can actually see
+      this.visible = true;
+      if (window.IntersectionObserver && canvas.parentElement){
+        new IntersectionObserver(es => { this.visible = es[0].isIntersecting; },
+          {rootMargin:'120px'}).observe(canvas.parentElement);
+      }
       registry.push(this);
     }
     size(){
@@ -45,6 +54,77 @@
       if (w === this.w && h === this.h) return;
       this.w = this.canvas.width  = w;
       this.h = this.canvas.height = h;
+      this.measureText();
+    }
+
+    /* every word becomes its own element, so a movement can take hold of the
+       text itself rather than sliding a finished block of it around. */
+    prepareWords(){
+      const inner = this.content && this.content.querySelector('.inner');
+      this.words = []; if (!inner) return;
+      inner.querySelectorAll('h3, p').forEach(block => {
+        const txt = block.textContent.trim().split(/\s+/);
+        block.textContent = '';
+        txt.forEach(word => {
+          const sp = document.createElement('span');
+          sp.className = 'w'; sp.textContent = word;
+          block.appendChild(sp);
+          block.appendChild(document.createTextNode(' '));
+        });
+      });
+      this.words = Array.from(inner.querySelectorAll('.w'));
+    }
+
+    /* each word's resting position, relative to the centre of the block */
+    measureWords(){
+      const inner = this.content && this.content.querySelector('.inner');
+      if (!inner || !this.words || !this.words.length){ this.wordPos = null; return; }
+      this.words.forEach(w => { w.style.transform = 'none'; });
+      const ir = inner.getBoundingClientRect();
+      const icx = ir.left + ir.width/2, icy = ir.top + ir.height/2;
+      this.wordPos = this.words.map(w => {
+        const r = w.getBoundingClientRect();
+        return { x: r.left + r.width/2 - icx, y: r.top + r.height/2 - icy,
+                 line: Math.round(r.top - ir.top) };
+      });
+    }
+
+    /* where the words sit, in canvas pixels. cached — the text only moves by
+       CSS transform, which does not change its layout position. */
+    measureText(){
+      const el = this.content && this.content.querySelector('.inner');
+      if (!el){ this.zone = null; return; }
+      const cr = this.canvas.getBoundingClientRect();
+      const ir = el.getBoundingClientRect();
+      if (!cr.width || !ir.width){ this.zone = null; return; }
+      this.zone = {
+        x: (ir.left - cr.left + ir.width/2)  * DPR,
+        y: (ir.top  - cr.top  + ir.height/2) * DPR,
+        rx: (ir.width/2)  * DPR,
+        ry: (ir.height/2) * DPR
+      };
+      this.zoneCss = { x: this.zone.x/DPR, y: this.zone.y/DPR };
+      this.measureWords();
+    }
+
+    /* the movement opens up where the words are, instead of the words sitting
+       on a panel on top of the movement. the animation is cut away with a soft
+       edge, so the two read as one composition rather than two layers. */
+    carveText(spread){
+      const z = this.zone; if (!z) return;
+      const ctx = this.ctx;
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.translate(z.x, z.y);
+      ctx.scale(z.rx + spread*0.55, z.ry + spread);
+      const g = ctx.createRadialGradient(0,0,0,0,0,1);
+      g.addColorStop(0,    'rgba(0,0,0,1)');
+      g.addColorStop(0.42, 'rgba(0,0,0,0.97)');
+      g.addColorStop(0.70, 'rgba(0,0,0,0.68)');
+      g.addColorStop(1,    'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(0,0,1,0,TAU); ctx.fill();
+      ctx.restore();
     }
 
     draw(time){
@@ -256,7 +336,14 @@
         }
       }
 
+      // how far the words wander at this level decides how much room the
+      // movement has to leave them
+      // a much tighter clearance now: the motion is allowed to crowd the text,
+      // because the text is part of it
+      this.carveText(minD*0.045 + (this.kind==='fall' ? minD*0.10*t : minD*0.02*t));
+
       this.moveContent(time, t);
+      this.moveWords(time, t, minD/DPR);
     }
 
     /* ── how each movement treats the words ──────────────────────
@@ -299,9 +386,79 @@
       el.style.transform = tf;
       el.style.opacity = op;
     }
+
+    /* ── the words as the material of the movement ─────────────────
+       fall  : every line shears off on its own depth, so the block
+               comes apart and you lose your place in it
+       bloom : the text breathes outward in the same wave as the petals
+       pulse : words flare out of turn at the edges of your reading
+       flow  : each word leans toward the cursor, like the field does
+       At 00 every word returns exactly to where it was set.        */
+    moveWords(time, m, minCss){
+      const ws = this.words, ps = this.wordPos;
+      if (!ws || !ps || ws.length !== ps.length) return;
+      if (m <= 0.001){
+        if (this.wordsDirty){
+          ws.forEach(w => { w.style.transform='none'; w.style.opacity=''; });
+          this.wordsDirty = false;
+        }
+        return;
+      }
+      this.wordsDirty = true;
+
+      for (let i=0;i<ws.length;i++){
+        const p = ps[i], w = ws[i];
+        let dx=0, dy=0, rot=0, sc=1, op=null;
+
+        if (this.kind === 'fall'){
+          const seed = p.line*0.021;
+          const drift = Math.sin(time/900 + seed*3.1);
+          const away  = 0.10*m*drift;
+          dx = p.x*away + Math.sin(time/1500 + seed*2)*minCss*0.035*m;
+          dy = p.y*away + Math.cos(time/1250 + seed)*minCss*0.012*m;
+          sc = 1 + Math.sin(time/620 + seed*2)*0.09*m;
+          rot = Math.sin(time/1700 + seed*2.6)*3.4*m;
+        }
+        else if (this.kind === 'bloom'){
+          const d = Math.hypot(p.x,p.y);
+          const wave = Math.sin(time/340 - d/70 - 1.4);
+          sc  = 1 + wave*0.075*m;
+          dy  = wave*minCss*0.012*m;
+          rot = wave*2.2*m;
+        }
+        else if (this.kind === 'pulse'){
+          const period = 2100 - m*1650;
+          const seed = ((i*7) % 17)/17;
+          const ph = ((time/period) + seed*1.7 + (p.x+p.y)/420) % 1;
+          const fl = Math.pow(1-ph, 5);
+          dx = fl*minCss*0.012*m;
+          sc = 1 + fl*0.06*m;
+          op = 1 - 0.34*m*(1-fl);      // the word you are not on dims away
+        }
+        else if (this.kind === 'flow'){
+          if (this.px != null && this.zoneCss){
+            const wx = this.zoneCss.x + p.x, wy = this.zoneCss.y + p.y;
+            const ddx = this.px/DPR - wx, ddy = this.py/DPR - wy;
+            const dist = Math.hypot(ddx,ddy) || 1;
+            const near = Math.max(0, 1 - dist/(minCss*0.62));
+            const push = near*minCss*0.030*m;
+            dx = (ddx/dist)*push; dy = (ddy/dist)*push;
+            rot = Math.atan2(ddy,ddx)*(180/Math.PI)*0.045*near*m;
+            sc = 1 + near*0.05*m;
+          }
+        }
+
+        w.style.transform = 'translate(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) +
+                            'px) rotate(' + rot.toFixed(2) + 'deg) scale(' + sc.toFixed(3) + ')';
+        if (op !== null) w.style.opacity = op.toFixed(3);
+      }
+    }
   }
 
-  function loop(time){ for (const m of registry) m.draw(time); requestAnimationFrame(loop); }
+  function loop(time){
+    for (const m of registry) if (m.visible !== false) m.draw(time);
+    requestAnimationFrame(loop);
+  }
   requestAnimationFrame(loop);
   window.MOTIONLESS = { Movement, registry };
 })();

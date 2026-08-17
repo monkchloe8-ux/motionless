@@ -41,20 +41,22 @@ run a tiny local server: `python3 -m http.server` in this folder, then visit
 
 ## The content is the constant
 
-Every stage holds the **same paragraph** — same words, same size, same spacing.
-Only the motion around it changes. So what a visitor is rating is not "do I like
+Every stage holds the **same paragraph**: same words, same size, same spacing.
+Only what the motion does to it changes. So what a visitor is rating is not "do I like
 this animation", it's "can I still read this while that is happening", which is
 the question the project is actually about.
 
-The paragraph is real HTML sitting over the canvas, not text drawn into it, so it
-stays selectable and readable to a screen reader at every level of the dial.
+Every word is its own element, so each movement takes hold of the text itself
+rather than sliding a finished block of it around. It is still real HTML, not text
+drawn into the canvas, so it stays selectable and readable to a screen reader at
+every level of the dial, and every word returns exactly to its set position at 00.
 
 Each movement treats the words differently — that difference is the finding:
 
-- **the fall** drags the paragraph through the whole disorienting field
-- **the bloom** decorates around it; the words barely move
-- **the pulse** never touches the words, and takes your eye off them regardless
-- **the flow** leans toward your cursor without ever moving the line you're on
+- **the fall** shears each line off on its own depth, so you lose your place between lines
+- **the bloom** breathes the words outward in the same radial wave as the petals
+- **the pulse** flares words out of turn and dims the ones you are not on
+- **the flow** leans every word toward your cursor, the way the field does
 
 ## The four movements
 
