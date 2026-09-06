@@ -30,7 +30,7 @@ p{margin:0}
 .link:hover{border-color:var(--ink)}
 
 /* ── fixed corner meta: same gutter as the content ── */
-.meta{position:fixed;z-index:20;top:0;padding:22px 0;
+.meta{position:absolute;z-index:20;top:0;padding:22px 0;
   font-family:"SF Mono",Menlo,monospace;font-size:11px;letter-spacing:.2em;
   text-transform:uppercase;color:var(--dim);pointer-events:none}
 .tl{left:var(--gut)}
