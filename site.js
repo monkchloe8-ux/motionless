@@ -8,6 +8,13 @@
 (function(){
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* is there a real cursor on this machine? `any-hover: hover` is true for a
+     mouse or trackpad and false for a finger. this decides nothing about how
+     the site behaves, it is only recorded, because one of the four movements
+     answers the cursor and cannot do that on a touch screen. */
+  const HAS_POINTER = matchMedia('(any-hover: hover)').matches;
+  const DEVICE = HAS_POINTER ? 'pointer' : 'touch';
+
   /* ── the intro ──
      it has to be dismissed before the page can be scrolled, because testers
      went straight past the written instructions and did not realise the
@@ -177,6 +184,11 @@
                    : form.recall.value === 'notread' ? 'did not read'
                    : form.recall.value ? 'no' : null,
       reducedMotion: REDUCED,
+      // the flow movement follows the cursor. a touch device has no cursor, so
+      // it falls back to centre and the words stop leaning. that makes flow a
+      // milder thing on a phone than on a laptop, and the two are not directly
+      // comparable. record which one this was so they can be separated later.
+      device: DEVICE,
       ts: new Date().toISOString()
     };
     const endpoint = window.MOTIONLESS_ENDPOINT;
