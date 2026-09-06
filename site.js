@@ -15,6 +15,14 @@
   const HAS_POINTER = matchMedia('(any-hover: hover)').matches;
   const DEVICE = HAS_POINTER ? 'pointer' : 'touch';
 
+  /* where this visitor came from, read off ?from= in the link that was shared.
+     an accessibility audience and a web design audience answer this differently,
+     and without this the two arrive as one blended average that cannot be taken
+     apart afterwards. letters, numbers and dashes only, capped at 24 characters,
+     so nothing arbitrary from the query string reaches the sheet. */
+  const SOURCE = (new URLSearchParams(location.search).get('from') || '')
+    .toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 24) || 'direct';
+
   /* ── the intro ──
      it has to be dismissed before the page can be scrolled, because testers
      went straight past the written instructions and did not realise the
@@ -189,6 +197,7 @@
       // milder thing on a phone than on a laptop, and the two are not directly
       // comparable. record which one this was so they can be separated later.
       device: DEVICE,
+      source: SOURCE,         // which shared link they arrived on
       ts: new Date().toISOString()
     };
     const endpoint = window.MOTIONLESS_ENDPOINT;
