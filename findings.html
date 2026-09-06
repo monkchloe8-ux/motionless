@@ -41,12 +41,16 @@
   <p class="axis mono"><span>00 static</span><span id="count">n = placeholder</span><span>03 maximal</span></p>
 
   <h2>What it looks like so far</h2>
-  <p>People strip the motion that harms them and keep the motion that helps. The fall and the
-     pulse settle low, the flow stays high, and the bloom splits the room. That gap is the finding: given a
-     control the web rarely offers, people can tell useful motion from the rest.</p>
+  <!-- written from the live numbers, not stated in advance. an earlier version
+       of this page asserted a conclusion that the data did not support. -->
+  <p id="summary">Waiting for responses.</p>
+  <p id="caution" class="mono" style="color:var(--dim)" hidden></p>
 
-  <h2>In their words</h2>
-  <p>“[survey quotes appear here once the site is live]”</p>
+  <h2>What this cannot tell you</h2>
+  <p>These are the settings people left behind, nothing more. The site does not know
+     whether someone found a movement uncomfortable, only where they stopped the slider.
+     It also cannot tell the difference between a considered choice and a slider nobody
+     touched, except that untouched sliders are recorded separately.</p>
 </div>
 
 <script src="site-config.js?v=3"></script>
@@ -70,6 +74,26 @@
     document.getElementById('count').textContent = 'n = ' + d.n;
     const st = document.getElementById('state');
     if (st) st.textContent = '(live. ' + d.n + ' responses so far)';
+
+    /* the summary is written from the numbers. it must never claim something
+       the chart above it contradicts. */
+    const names = { fall:'the fall', bloom:'the bloom', pulse:'the pulse', flow:'the flow' };
+    const keys = Object.keys(names).filter(k => d.avg[k] !== undefined);
+    if (keys.length){
+      const sorted = keys.slice().sort((a,b) => d.avg[b] - d.avg[a]);
+      const most = sorted[0], least = sorted[sorted.length-1];
+      document.getElementById('summary').textContent =
+        'So far, the movement people have kept most is ' + names[most] +
+        ', at an average of ' + d.avg[most].toFixed(1) + ' out of 3. The one they have ' +
+        'turned down most is ' + names[least] + ', at ' + d.avg[least].toFixed(1) + '. ' +
+        'Every slider starts at 00, so any value above zero is motion somebody chose to add.';
+      const c = document.getElementById('caution');
+      if (d.n < 20){
+        c.hidden = false;
+        c.textContent = 'Only ' + d.n + ' response' + (d.n === 1 ? '' : 's') +
+          ' so far. Treat this as early signal, not a result.';
+      }
+    }
   }).catch(e => console.warn('[motionless] findings unavailable:', e));
 })();
 </script>
