@@ -4,21 +4,48 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MOTION / LESS</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
+<!-- ─────────── INTRO ───────────
+     testers scrolled straight past the instructions on the landing page and
+     did not realise the slider position was their answer. this has to be
+     dismissed before the site can be used, so it cannot be missed. -->
+<div class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+  <div class="intro-card">
+    <p class="mono">Before you start</p>
+    <h2 id="introTitle">There are four sliders. Where you leave them is your answer.</h2>
+    <ol>
+      <li>Each section below shows <strong>the same short paragraph</strong>, with a
+          different kind of movement around it. <strong>Read it.</strong> At the end you
+          will be asked one question about what it said.</li>
+      <li>Everything starts still. Next to each one is a slider that adds motion.
+          <strong>Turn it up</strong> until the movement is as much as you would
+          actually want on a website.</li>
+      <li><strong>Leave the slider there.</strong> That position is what gets recorded
+          and published. There is no right answer.</li>
+    </ol>
+    <p class="intro-note">Some sections move a great deal and may feel uncomfortable.
+       You can stop at any time.</p>
+    <button type="button" class="btn" id="introGo">I understand, start</button>
+  </div>
+</div>
+
 <!-- corner meta -->
 <div class="meta tl mono">Motion / Less</div>
-<div class="meta tr mono">an experiment in web motion</div>
+<div class="meta tr mono">an experiment in web motion &nbsp;·&nbsp; v3 &middot; 22 aug</div>
 
 <main>
 
   <!-- ─────────── LANDING ─────────── -->
   <section class="pane hero" id="landing">
     <h1>MOTION<span class="slash">/</span>LESS</h1>
-    <p class="lede">Same content, four amounts of motion. You decide how much.
-       We publish what people keep.</p>
+    <p class="lede">Same paragraph, four kinds of motion. Everything starts still.
+       Read it, then turn each slider up to as much motion as you would want, and
+       leave it there. That is your answer, and we publish it.</p>
+    <p class="lede" style="margin-top:20px;font-size:15px">
+       <a class="link" href="about.html">What is this, and who is it for? →</a></p>
     <p class="cue mono" id="cue">Scroll ↓</p>
   </section>
 
@@ -105,9 +132,27 @@
   <!-- ─────────── SUBMIT ─────────── -->
   <section class="pane submit" id="submit">
     <h2>How much did you keep?</h2>
-    <p class="line">Two quick questions, then see what everyone else chose.</p>
+    <p class="line">Before you submit, scroll back up if you want to change any of the
+       four sliders. Wherever you leave them is what gets recorded. Then two quick
+       questions, and you can see what everyone else chose.</p>
 
     <form id="survey">
+      <!-- the recall question. two testers used the whole site without reading the
+           paragraph at all, which made the comprehension claim untestable. asking
+           this, and saying up front that it is coming, makes reading part of the task. -->
+      <fieldset class="recall">
+        <legend class="mono">Without scrolling back: what did the paragraph say causes the discomfort?</legend>
+        <label><input type="radio" name="recall" value="mismatch">
+               A mismatch between what your eyes see and what your body feels</label>
+        <label><input type="radio" name="recall" value="colours">
+               Bright colours and high contrast</label>
+        <label><input type="radio" name="recall" value="distance">
+               Screens being held too close to your face</label>
+        <label><input type="radio" name="recall" value="notread">
+               I did not read it</label>
+        <p class="recall-note">The last option is a real answer, not a failure. It is
+           useful to know.</p>
+      </fieldset>
       <fieldset>
         <legend class="mono">Are you a designer or developer?</legend>
         <label><input type="radio" name="designer" value="yes"> Yes</label>
@@ -139,8 +184,8 @@
   </footer>
 </main>
 
-<script src="site-config.js"></script>
-<script src="movements.js"></script>
-<script src="site.js"></script>
+<script src="site-config.js?v=3"></script>
+<script src="movements.js?v=3"></script>
+<script src="site.js?v=3"></script>
 </body>
 </html>

@@ -52,6 +52,26 @@ p{margin:0}
 .lede{max-width:26em;color:#C7C7C1;font-size:clamp(15px,1.8vw,19px);margin-top:34px}
 .cue{margin-top:48px;transition:opacity .4s}
 
+/* ── the intro, which has to be dismissed before anything else ── */
+.intro{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(10,10,11,.97);
+  display:flex;align-items:center;justify-content:center;
+  padding:var(--gut);
+}
+.intro[hidden]{display:none}
+body.intro-open{overflow:hidden}
+.intro-card{max-width:34em}
+.intro-card h2{font-size:clamp(24px,3.4vw,38px);font-weight:200;line-height:1.15;margin:14px 0 26px}
+.intro-card ol{margin:0 0 26px;padding-left:1.4em;color:#C7C7C1}
+.intro-card li{margin-bottom:14px;font-size:clamp(14px,1.6vw,16px);line-height:1.55}
+.intro-card strong{color:var(--ink);font-weight:400}
+.intro-note{color:var(--dim);font-size:13.5px;line-height:1.55;margin-bottom:30px;max-width:30em}
+@media (prefers-reduced-motion: no-preference){
+  .intro-card{animation:introIn .5s cubic-bezier(.16,1,.3,1) both}
+  @keyframes introIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+}
+
 /* ── a movement ── */
 .movement{
   flex-direction:row;align-items:center;gap:min(6vw,80px);
@@ -81,7 +101,9 @@ p{margin:0}
 .dial .cap,.dial .read{position:absolute;top:0;
   font-family:"SF Mono",Menlo,monospace;font-size:10px;letter-spacing:.15em;
   text-transform:uppercase;line-height:1}
-.dial .cap{left:0;color:var(--dim)}
+.dial .cap{left:0;color:var(--dim);letter-spacing:.08em;text-transform:none;font-size:11px}
+/* testers did not realise where they left the slider was the answer */
+.dial-note{margin-top:26px;color:var(--dim);font-size:12.5px;line-height:1.5;max-width:26em}
 .dial .read{right:0;color:var(--ink);letter-spacing:.1em;font-variant-numeric:tabular-nums}
 .dial .rail{position:relative;height:46px;margin:0 13px;cursor:pointer}
 .dial .track{position:absolute;top:10px;left:0;right:0;height:2px;background:var(--line2)}
@@ -108,6 +130,14 @@ p{margin:0}
 #survey legend{margin-bottom:14px;padding:0}
 #survey label{display:inline-flex;align-items:center;margin:0 22px 10px 0;
   font-size:15px;cursor:pointer;color:#C7C7C1}
+/* the recall question needs its options stacked, they are full sentences */
+#survey .recall{border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  padding:22px 0;margin-bottom:30px}
+#survey .recall legend{max-width:34em;line-height:1.45;color:var(--ink);
+  font-size:13px;letter-spacing:.06em;text-transform:none}
+#survey .recall label{display:flex;align-items:flex-start;margin:0 0 11px;max-width:36em}
+#survey .recall input{margin-top:5px;flex:0 0 auto}
+.recall-note{margin-top:14px;color:var(--dim);font-size:12.5px}
 #survey input{margin:0 9px 0 0;accent-color:var(--ink)}
 .btn{appearance:none;background:var(--ink);color:var(--bg);border:0;
   font:600 14px/1 "Helvetica Neue",Arial,sans-serif;letter-spacing:.02em;
@@ -165,8 +195,11 @@ footer a{color:var(--dim)}
   text-shadow:0 0 22px var(--bg), 0 0 8px var(--bg);
 }
 .stage .content .w{display:inline-block;will-change:transform,opacity}
-.stage .content h3{font-size:clamp(18px,2.3vw,26px);font-weight:300;letter-spacing:-.015em}
-.stage .content p{margin-top:12px;color:#C7C7C1;font-size:clamp(13px,1.35vw,15px);line-height:1.65}
+/* it has to read as the content, not as a caption on a graphic. testers did not
+   attempt it at all, so it is now larger, brighter and set at a proper measure. */
+.stage .content h3{font-size:clamp(19px,2.5vw,28px);font-weight:300;letter-spacing:-.015em}
+.stage .content p{margin-top:14px;color:var(--ink);font-size:clamp(15px,1.6vw,18px);
+  line-height:1.62;max-width:24em}
 @media (prefers-reduced-motion: reduce){
   .stage .content, .stage .content .w{transform:none !important;opacity:1 !important}
 }

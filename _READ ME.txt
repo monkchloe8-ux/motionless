@@ -1,0 +1,15 @@
+THESE ARE COPIES, NOT THE REAL SITE.
+
+The real site is one folder up, in "website".
+Edit there. Never edit these.
+
+This folder exists only so you can press Cmd+A and drag the exact
+eight files GitHub needs, without picking them out one by one.
+
+BEFORE EVERY UPLOAD: ask Claude to refresh this folder, or copy the
+eight files across yourself. Otherwise you will upload an old version.
+
+Last refreshed: 22 August 2026, matching site version v3.
+
+Delete this text file before dragging, or just leave it. GitHub will
+take it and it does no harm.

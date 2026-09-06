@@ -7,18 +7,75 @@
    ══════════════════════════════════════════════════════════ */
 (function(){
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const state = {};                 // { fall: 3.0, bloom: 3.0, pulse: 3.0, flow: 3.0 }
+
+  /* ── the intro ──
+     it has to be dismissed before the page can be scrolled, because testers
+     went straight past the written instructions and did not realise the
+     slider position was the thing being recorded. */
+  const intro = document.getElementById('intro');
+  if (intro){
+    document.body.classList.add('intro-open');
+    const go = document.getElementById('introGo');
+    const close = () => {
+      intro.hidden = true;
+      document.body.classList.remove('intro-open');
+      document.getElementById('landing')?.focus?.();
+    };
+    go?.addEventListener('click', close);
+    // keyboard: enter or escape both get you out, and focus starts on the button
+    intro.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    setTimeout(() => go?.focus(), 50);
+  }
+  const state   = {};   // where each dial ended up
+  const touched = {};   // did they move it at all, or is this just the default?
+  const dwell   = {};   // seconds spent with each movement on screen
   const started = performance.now();
   let firstMove = null;
+
+  /* ── shuffle the order ──
+     everyone used to meet the fall first with fresh attention and the flow last
+     when they were bored of scrolling. that order effect was baked into every
+     response. now the order is random per visitor and recorded with the data. */
+  const main = document.querySelector('main');
+  const sections = Array.from(document.querySelectorAll('.movement'));
+  const order = sections.slice().sort(() => Math.random() - 0.5);
+  const submitSection = document.getElementById('submit');
+  order.forEach((s, i) => {
+    main.insertBefore(s, submitSection);
+    const tag = s.querySelector('.tag');
+    if (tag) tag.textContent = 'Movement 0' + (i + 1);
+  });
+  const shownOrder = order.map(s => s.dataset.movement).join(' > ');
 
   /* ── build a movement + its dial for each section ── */
   document.querySelectorAll('.movement').forEach(section => {
     const kind = section.dataset.movement;
     const canvas = section.querySelector('canvas');
     const mv = new MOTIONLESS.Movement(canvas, kind);
-    mv.level = REDUCED ? 0 : 3;      // reduced-motion → start static
-    state[kind] = mv.level;
+    // starts still. testers arriving at full motion never attempted to read the
+    // paragraph, and a dial that starts at maximum anchors every answer upward.
+    mv.level = 0;
+    state[kind] = 0;
+    touched[kind] = false;
+    dwell[kind] = 0;
     makeDial(section.querySelector('[data-dial]'), mv, kind);
+
+    // how long this movement was actually on screen, as a second measure of
+    // whether high motion costs attention
+    let since = null;
+    if (window.IntersectionObserver){
+      new IntersectionObserver(es => {
+        const vis = es[0].isIntersecting;
+        if (vis && since === null) since = performance.now();
+        else if (!vis && since !== null){
+          dwell[kind] += (performance.now() - since) / 1000;
+          since = null;
+        }
+      }, { threshold: 0.5 }).observe(section);
+      addEventListener('beforeunload', () => {
+        if (since !== null) dwell[kind] += (performance.now() - since) / 1000;
+      });
+    }
   });
 
   /* ── the dial: a continuous slider with four marked stops ──
@@ -27,13 +84,17 @@
   function makeDial(el, mv, kind){
     const stops = ['03','02','01','00'];         // left = max, right = static
     el.innerHTML =
-      '<span class="cap">Motion</span><span class="read"></span>' +
-      '<div class="rail" tabindex="0" role="slider" aria-label="Amount of motion" ' +
-      'aria-valuemin="0" aria-valuemax="3" aria-valuenow="3">' +
+      '<span class="cap">How much motion do you want here?</span><span class="read"></span>' +
+      '<div class="rail" tabindex="0" role="slider" ' +
+      'aria-label="How much motion you want in this movement. It starts still. ' +
+      'Turn it up to as much as you would want, then leave it there." ' +
+      'aria-valuemin="0" aria-valuemax="3" aria-valuenow="0">' +
         '<div class="track"></div><div class="fill"></div>' +
         stops.map((s,i)=>`<div class="tick" style="left:${i/3*100}%"><span>${s}</span></div>`).join('') +
         '<div class="handle"></div>' +
-      '</div>';
+      '</div>' +
+      // testers did not realise the position they left it in was the answer
+      '<p class="dial-note">Starts still. Turn it up to as much as you would want, then leave it there. That is what gets recorded.</p>';
     const rail   = el.querySelector('.rail');
     const handle = el.querySelector('.handle');
     const fill   = el.querySelector('.fill');
@@ -60,6 +121,7 @@
       ticks.forEach((tk,i) => tk.classList.toggle('on', i === nearest));
     }
     function markMoved(){
+      touched[kind] = true;     // distinguishes a choice from an untouched default
       if (firstMove === null) firstMove = Math.round((performance.now()-started)/1000);
     }
     apply(mv.level);                                  // start position
@@ -101,9 +163,19 @@
     e.preventDefault();
     const data = {
       dials: state,                                   // exact value per movement
+      touched: touched,                               // false = never moved, not a choice
+      dwell: dwell,                                   // seconds each movement was on screen
+      shownOrder: shownOrder,                         // the random order they saw
+      startedAt: 0,                                   // every dial now starts still
       timeToFirstMove: firstMove,
       designer: form.designer.value || null,
       sensitive: form.sensitive.value || null,
+      // 'mismatch' is the answer the paragraph actually gives. 'notread' is an
+      // honest option and counts as data, not as a wrong answer.
+      recall: form.recall.value || null,
+      recallCorrect: form.recall.value === 'mismatch' ? 'yes'
+                   : form.recall.value === 'notread' ? 'did not read'
+                   : form.recall.value ? 'no' : null,
       reducedMotion: REDUCED,
       ts: new Date().toISOString()
     };
