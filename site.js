@@ -20,8 +20,22 @@
      and without this the two arrive as one blended average that cannot be taken
      apart afterwards. letters, numbers and dashes only, capped at 24 characters,
      so nothing arbitrary from the query string reaches the sheet. */
-  const SOURCE = (new URLSearchParams(location.search).get('from') || '')
-    .toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 24) || 'direct';
+  const TAG = (new URLSearchParams(location.search).get('from') || '')
+    .toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 24);
+
+  /* platforms rewrite outgoing links. mastodon stripped ?from= entirely, so the
+     first six real responses all recorded 'direct' and the channel was lost.
+     when the tag does not survive, fall back to whoever sent them: the referring
+     domain, host only, never the full path. */
+  function referrerHost(){
+    try {
+      if (!document.referrer) return '';
+      const h = new URL(document.referrer).hostname.replace(/^www\./, '');
+      if (h === location.hostname) return '';        // moving around our own site
+      return h.toLowerCase().replace(/[^a-z0-9.-]/g, '').slice(0, 40);
+    } catch (e) { return ''; }
+  }
+  const SOURCE = TAG || referrerHost() || 'direct';
 
   /* ── the intro ──
      it has to be dismissed before the page can be scrolled, because testers
@@ -174,8 +188,16 @@
 
   /* ── submit → reward ── */
   const form = document.getElementById('survey');
+  let submitted = false;              // one visitor, one response
   form?.addEventListener('submit', e => {
     e.preventDefault();
+    // two rows in the sheet were the same person double-clicking Submit: same
+    // second, same four values, same dwell. indistinguishable afterwards from
+    // two people who genuinely agreed, so it has to be stopped here.
+    if (submitted) return;
+    submitted = true;
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn){ btn.disabled = true; btn.textContent = 'Submitting…'; }
     const data = {
       dials: state,                                   // exact value per movement
       touched: touched,                               // false = never moved, not a choice
