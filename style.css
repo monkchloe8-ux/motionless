@@ -210,3 +210,12 @@ footer a{color:var(--dim)}
 
 /* ── findings axis ── */
 .axis{display:flex;justify-content:space-between;gap:12px;margin-top:14px;color:var(--dim)}
+
+/* the claim code for people who came from a survey exchange. they gave up
+   three minutes to help; they should not have to hunt for their points. */
+.exchange{border:1px solid var(--line2);background:var(--panel);
+  padding:22px 24px;margin:0 0 26px}
+.exchange .mono{margin-bottom:10px}
+.exchange .code{font-family:"SF Mono",Menlo,Consolas,monospace;
+  font-size:clamp(17px,2.4vw,23px);letter-spacing:.12em;color:var(--ink);
+  margin-top:12px;user-select:all}
