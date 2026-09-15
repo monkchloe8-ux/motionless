@@ -261,8 +261,28 @@
     }
   }
 
-  function showReward(){
+    /* people who arrive from a survey exchange need a code at the end to claim
+     their points for taking part. without it they get nothing for helping, so
+     it is shown only to them, identified by the tag on the link they followed. */
+  const EXCHANGE_CODES = {
+    surveycircle: { label: 'SurveyCircle', code: '9F41-9SL7-A28H-MJE9' }
+  };
+
+  function showExchangeCode(){
+    const entry = EXCHANGE_CODES[SOURCE];
+    const box = document.getElementById('exchangeCode');
+    if (!box) return;
+    if (!entry){ box.hidden = true; return; }
+    box.hidden = false;
+    box.innerHTML =
+      '<p class="mono">' + entry.label + ' participants</p>' +
+      '<p>Thank you. Copy this code to claim your points:</p>' +
+      '<p class="code">' + entry.code + '</p>';
+  }
+
+function showReward(){
     drawReward(null, 0);                                  // show your own numbers straight away
+    showExchangeCode();
     const r = document.getElementById('reward');
     r.hidden = false; r.scrollIntoView({behavior: REDUCED?'auto':'smooth', block:'start'});
     document.getElementById('rewardHead').textContent =
